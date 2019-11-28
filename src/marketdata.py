@@ -7,12 +7,11 @@ class EventType:
 
 class Quote:
 
-    def __init__(self, price, qty, side, level, time):
+    def __init__(self, price, qty, side, level):
         self.price = price
         self.qty = qty
         self.side = BUY if side == 1 else SELL
         self.level = level
-        self.time = time
 
     def __str__(self):
         return f'{self.side} {self.qty}@{self.price}'
@@ -34,15 +33,15 @@ class TradeData(EventType):
 
 class MarketData(EventType):
 
-    def __init__(self, symbol, nlevels, *quotes):
+    def __init__(self, symbol, nlevels, quotes):
         self.nlevels = nlevels
         self.symbol = symbol
         self.quotes = quotes
-        self.buys = list(filter(lambda quote: quote.side == BUY, self.quotes)).sort(key = lambda x: x.level)
-        self.sells = list(filter(lambda quote: quote.side == SELL, self.quotes)).sort(key = lambda x: x.level)
+        self.buys = list(filter(lambda quote: quote.side == BUY, self.quotes))
+        self.sells = list(filter(lambda quote: quote.side == SELL, self.quotes))
 
     def bestAsk(self):
-        min(x.price for x in self.sells)
+        return min(x.price for x in self.sells)
 
     def bestBid(self):
         max(x.price for x in self.buys)
