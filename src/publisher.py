@@ -1,15 +1,15 @@
 import csv
 import logging
+from event_config import subscribers
 
 class EventConfig():
-    def __init__(self,priority, mapping):
-        self.mapping = mapping
-        self.priority = priority
 
-class EVENT_TYPE:
-    def __init__(self, config: EventConfig):
-        self.config = config
-        self.mapping = mapping
+    def __init__(self, dataClass, priority, mapping):
+        self.dataClass = dataClass
+        self.dataClass.mapping = mapping
+        self.priority = priority
+        self.dataClass = dataClass
+
 
 class FileEngine():
 
@@ -21,20 +21,21 @@ class FileEngine():
             logging.debug(line)
             yield line
 
+
 class Publisher:
 
-    subscriptions = {}
-    def __init__(self, connectionString, engine, data_type: EVENT_TYPE):
+    def __init__(self, connectionString, engine, eventConfig):
          self.engine = engine(connectionString)
-         self.data_type = data_type
+         self.data_type = eventConfig.dataClass
 
     def notifySubscribers(self, data):
-        return map(lambda sub: self.get(sub).onPublishedEvent(event_type=self.data_type), self.subscriptions)
+        global subscribers
+        for sub in subscribers:
+            sub.onPublishedEvent(data)
 
-    def onSubscription(self, name, strategy):
-        self.subscription.update({name: strategy})
-        strategy.subscribe(type(self.data_type))
+    def factory(self, *fields):
+        return self.data_type(*self.data_type.mapping(*fields))
 
     def do(self):
         for i in self.engine:
-            self.notifySubscribers(i)
+            self.notifySubscribers(self.factory(*i))

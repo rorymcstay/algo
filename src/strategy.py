@@ -1,4 +1,4 @@
-from src.marketdata import EVENT_TYPE
+from src.marketdata import MarketData, TradeData
 import logging
 
 class Strategy():
@@ -8,19 +8,29 @@ class Strategy():
     def __init__(self, **params):
         self.params = params
 
-    def subscribe(self, event_type :EVENT_TYPE, act: callable = None):
-        logging.info(f'subscribed to {event_type.__name__}')
-        self.subscriptions.update({type(event_type): act})
-
-    def onPublishedEvent(event: EVENT_TYPE) -> None:
-        if self.subscriptions.get(type(event)) is not None:
-            self.subcriptions[type(event)](event)
+    def onPublishedEvent(self, event) -> None:
+        type = event.__class__.__name__
+        if self.subscriptions.get(type) is not None:
+            self.subscriptions[type](event)
         else:
-            logging.debug(f'{self.__name__} is doing nothing on {event_type.__name__}')
+            logging.debug(f'{self.__class__.__name__} is doing nothing on {event.__name__}')
+
+    @staticmethod
+    def subscribed(event_type, subscriptions=subscriptions):
+
+        def action(func):
+            subscribed_event = event_type
+
+            def wrapper(event, *args, **kwargs):
+                if event is isinstance(event, type(subscribed_event)):
+                    return func(*args, **kwargs)
+            return wrapper
+        subscriptions.update({event_type.__name__: action})
+        return action
 
 
 class Test(Strategy):
 
-    def printEvent(event: EVENT_TYPE):
-        logging.info(event)
-
+    @Strategy.subscribed(TradeData)
+    def printEvent(self, event):
+        print(event)
