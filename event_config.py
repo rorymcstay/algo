@@ -1,6 +1,6 @@
-from src.strategy import Test
+from src.subscriber import Strategy
 
-test = Test()
+test = Strategy()
 
 subscribers = [
     test

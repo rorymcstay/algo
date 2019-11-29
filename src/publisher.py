@@ -1,6 +1,10 @@
 import csv
 import logging
+from threading import Thread
+
 from event_config import subscribers
+from src.engine import ThreadPool
+
 
 class EventConfig():
 
@@ -52,7 +56,7 @@ class FileEngine():
             yield line
 
 
-class Publisher:
+class Publisher(Thread):
 
     def __init__(self, connectionString, engine, eventConfig):
          """
@@ -62,9 +66,14 @@ class Publisher:
          :param engine: the class of engine to use
          :param eventConfig: the event config object
          """
+         super().__init__()
          self.engine = engine(connectionString)
          self.data_type = eventConfig.dataClass
          self.complex = eventConfig.complex
+         self.threadPool = ThreadPool(2)
+         self.daemon = True
+         self.connectionString = connectionString
+         self.start()
 
     def notifySubscribers(self, data):
         """
@@ -75,7 +84,8 @@ class Publisher:
         """
         global subscribers
         for sub in subscribers:
-            sub.onPublishedEvent(data)
+            self.threadPool.add_task(sub.onPublishedEvent, data)
+        self.threadPool.wait_completion()
 
     def factory(self, *fields):
         """
@@ -89,7 +99,7 @@ class Publisher:
         else:
             return self.data_type.mapping(*fields)
 
-    def do(self):
+    def run(self) -> None:
         """
         Run the publisher
 
@@ -98,3 +108,6 @@ class Publisher:
         for i in self.engine:
             logging.debug(f'received {self.data_type.__name__} event: {i} ')
             self.notifySubscribers(self.factory(*i))
+
+
+

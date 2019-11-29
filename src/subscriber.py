@@ -1,7 +1,7 @@
 from src.marketdata import MarketData, TradeData
 import logging
 
-class Strategy(object):
+class Subscriber(object):
 
     def __init__(self, **params):
         """
@@ -44,22 +44,29 @@ class Strategy(object):
         """
 
         def action(func):
-            def wrapper(*args, **kwargs):
+            def decision(*args, **kwargs):
                 if isinstance(args[1], event_type):
                     func(*args, **kwargs)
                 else:
                     logging.debug(f'not doing anthing {event_type}')
-            return wrapper
+            return decision
 
         return action
 
 
-class Test(Strategy):
+class Analytic(Subscriber):
 
-    @Strategy.subscribed(TradeData)
+    @Subscriber.subscribed(TradeData)
+    def predictNextPrice(self):
+        pass
+
+
+class Strategy(Subscriber):
+
+    @Subscriber.subscribed(TradeData)
     def printTradeEvent(self, event):
         print(f'trade event {event}')
 
-    @Strategy.subscribed(MarketData)
+    @Subscriber.subscribed(MarketData)
     def printMarketData(self, event: MarketData):
         print(event.bestAsk())
