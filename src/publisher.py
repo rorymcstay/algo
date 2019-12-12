@@ -1,6 +1,7 @@
 import csv
 import logging
 from threading import Thread
+from time import sleep
 
 from event_config import subscribers
 from src.engine import ThreadPool
@@ -56,7 +57,7 @@ class FileEngine():
             yield line
 
 
-class Publisher(Thread):
+class Publisher:
 
     def __init__(self, connectionString, engine, eventConfig):
          """
@@ -73,7 +74,6 @@ class Publisher(Thread):
          self.threadPool = ThreadPool(2)
          self.daemon = True
          self.connectionString = connectionString
-         self.start()
 
     def notifySubscribers(self, data):
         """
@@ -105,9 +105,15 @@ class Publisher(Thread):
 
         :return:
         """
+        logging.info("starting publisher")
         for i in self.engine:
-            logging.debug(f'received {self.data_type.__name__} event: {i} ')
+            logging.info(f'received {self.data_type.__name__} event: {i} ')
             self.notifySubscribers(self.factory(*i))
+
+    def start(self) -> None:
+        thread = Thread(target=self.run, args=())
+        thread.setName(self.connectionString)
+        thread.start()
 
 
 

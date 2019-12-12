@@ -21,10 +21,8 @@ marketdata = EventConfig(dataClass=MarketData,
                          mapping=lambda *args: lobster_market_data_mapping(MarketData, Quote, *args), complex=False)
 
 trades = Publisher("lobster_sample/AAPL_2012-06-21_34200000_37800000_message_30.csv", FileEngine, trades)
-marketdata = Publisher("lobster_sample/AAPL_2012-06-21_34200000_37800000_orderbook_30.csv", FileEngine, marketdata)
+marketdata = Publisher(connectionString="lobster_sample/AAPL_2012-06-21_34200000_37800000_orderbook_30.csv", engine=FileEngine, eventConfig=marketdata)
 
 if __name__ == "__main__":
-    trades.start()
-    marketdata.start()
-
-
+    for publisher in [trades, marketdata]:
+        publisher.start()

@@ -5,7 +5,7 @@ from queue import Queue
 
 class Worker(Thread):
     """ Thread executing tasks from a given tasks queue """
-    def __init__(self, tasks):
+    def __init__(self, tasks: Queue):
         Thread.__init__(self)
         self.tasks = tasks
         self.daemon = True
