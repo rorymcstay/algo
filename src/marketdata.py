@@ -25,7 +25,7 @@ class TradeData(EventType):
         self.time = time
         self.direction = BUY if direction == 1 else SELL
         self.size = size
-        self.price = price
+        self.price = int(price)
 
     def __str__(self):
         return f'dir={self.direction} {self.size}@{self.price} type={self.type}'

@@ -56,9 +56,16 @@ class Subscriber(object):
 
 class Analytic(Subscriber):
 
+    rollingAverageSize = 100
+    prices = []
+    averageTradePrice = None
+
     @Subscriber.subscribed(TradeData)
-    def predictNextPrice(self):
-        pass
+    def averageTradePrice(self, event: TradeData):
+        self.prices.append(event.price)
+        self.prices.pop(0) if len(self.prices) > self.rollingAverageSize else None
+        self.averageTradePrice = sum(self.prices)/len(self.prices)
+        print(f'avergae trade price is: {self.averageTradePrice}')
 
 
 class Strategy(Subscriber):
@@ -69,4 +76,4 @@ class Strategy(Subscriber):
 
     @Subscriber.subscribed(MarketData)
     def printMarketData(self, event: MarketData):
-        print(event.bestAsk())
+        logging.debug(event.bestAsk())

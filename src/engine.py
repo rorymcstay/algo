@@ -13,9 +13,9 @@ class Worker(Thread):
 
     def run(self):
         while True:
-            func, args, kargs = self.tasks.get()
+            func, args, kwargs = self.tasks.get()
             try:
-                func(*args, **kargs)
+                func(*args, **kwargs)
             except Exception as e:
                 # An exception happened in this thread
                 print(e)
